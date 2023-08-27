@@ -1,3 +1,5 @@
+import org.gradle.language.nativeplatform.internal.Dimensions
+
 pluginManagement {
     repositories {
         google()

@@ -13,11 +13,11 @@ android {
         targetSdk = 33
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
+        setProperty("archivesBaseName", "PID Controller")
     }
 
     buildTypes {
@@ -46,6 +46,24 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+}
+
+tasks.register("renameApk") {
+    doLast {
+        val apkDir = "${rootDir}/app/release"
+        val files = fileTree(apkDir).files
+        files.forEach { file ->
+            val newName = file.nameWithoutExtension.replace("-release", "") +
+                    ".${file.extension}"
+            file.renameTo(File(apkDir, newName))
+        }
+    }
+}
+
+tasks.all {
+    if (name.startsWith("package") && name.endsWith("Release")) {
+        finalizedBy("renameApk")
     }
 }
 

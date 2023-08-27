@@ -53,7 +53,9 @@ import androidx.core.app.ActivityCompat
 import code.z.pidcontroller.ui.theme.PIDControllerTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.util.UUID
@@ -68,6 +70,9 @@ class MainActivity : ComponentActivity() {
     private lateinit var bluetoothManager: BluetoothManager
     private lateinit var bluetoothAdapter: BluetoothAdapter
     private var bluetoothSocket: BluetoothSocket? = null
+
+    private var connectionJob: Job? = null
+    private val interval = 5000L
 
     private val uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
 
@@ -271,6 +276,7 @@ class MainActivity : ComponentActivity() {
                                         bluetoothSocket?.connect()
                                         connectionStatus.value = true
                                         showDialog.value = false
+                                        monitorBluetoothConnection(connectionStatus)
                                         showToast("Device connected")
                                     } catch (e: IOException) {
                                         disconnectBluetooth()
@@ -420,5 +426,25 @@ class MainActivity : ComponentActivity() {
 
     private fun sendDataOverBluetooth(data: Char) {
         bluetoothSocket?.outputStream?.write(data.code)
+    }
+
+    private fun monitorBluetoothConnection(connectionStatus: MutableState<Boolean>) {
+        connectionJob = CoroutineScope(Dispatchers.IO).launch {
+            while (isActive) {
+                delay(interval)
+                try {
+                    bluetoothSocket!!.inputStream.read()
+                } catch (e: IOException) {
+                    connectionStatus.value = false
+                    disconnectBluetooth()
+                    stopMonitoring()
+                }
+            }
+        }
+    }
+
+    private fun stopMonitoring() {
+        connectionJob?.cancel()
+        connectionJob = null
     }
 }
