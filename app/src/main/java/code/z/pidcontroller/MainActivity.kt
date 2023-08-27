@@ -13,6 +13,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -35,9 +36,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -93,132 +96,137 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             PIDControllerTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = Color.Black,
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .paint(
+                            painter = painterResource(id = R.drawable.background),
+                            contentScale = ContentScale.FillBounds
+                        ),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        // PID controllers
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(
-                                    paddingValues = PaddingValues(
-                                        5.dp, 0.dp
-                                    )
-                                ), horizontalArrangement = Arrangement.SpaceEvenly
+                    Surface(color = Color.Transparent) {
+                        Column(
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            val kp = remember { mutableStateOf(0.0F) }
-                            val kd = remember { mutableStateOf(0.0F) }
-                            val ki = remember { mutableStateOf(0.0F) }
+                            // PID controllers
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        paddingValues = PaddingValues(
+                                            5.dp, 0.dp
+                                        )
+                                    ), horizontalArrangement = Arrangement.SpaceEvenly
+                            ) {
+                                val kp = remember { mutableStateOf(0.0F) }
+                                val kd = remember { mutableStateOf(0.0F) }
+                                val ki = remember { mutableStateOf(0.0F) }
 
-                            ControllerColumn(
-                                constant = "Kp",
-                                state = kp,
-                                incrementCode = kpIncrementCode,
-                                decrementCode = kpDecrementCode
-                            )
-                            ControllerColumn(
-                                constant = "Kd",
-                                state = kd,
-                                incrementCode = kdIncrementCode,
-                                decrementCode = kdDecrementCode
-                            )
-                            ControllerColumn(
-                                constant = "Ki",
-                                state = ki,
-                                incrementCode = kiIncrementCode,
-                                decrementCode = kiDecrementCode
-                            )
-                        }
-
-                        // Connection status
-                        val connectionStatus = remember { mutableStateOf(false) }
-                        val showDialog = remember { mutableStateOf(false) }
-
-                        Text(
-                            text = if (!connectionStatus.value) "Not Connected" else "Connected",
-                            color = if (!connectionStatus.value) Color.Red else Color.Green,
-                            modifier = Modifier.padding(
-                                paddingValues = PaddingValues(
-                                    0.dp, 50.dp
+                                ControllerColumn(
+                                    constant = "Kp",
+                                    state = kp,
+                                    incrementCode = kpIncrementCode,
+                                    decrementCode = kpDecrementCode
                                 )
-                            ),
-                            fontFamily = CamingoCodeFont,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 24.sp
-                        )
+                                ControllerColumn(
+                                    constant = "Kd",
+                                    state = kd,
+                                    incrementCode = kdIncrementCode,
+                                    decrementCode = kdDecrementCode
+                                )
+                                ControllerColumn(
+                                    constant = "Ki",
+                                    state = ki,
+                                    incrementCode = kiIncrementCode,
+                                    decrementCode = kiDecrementCode
+                                )
+                            }
 
-                        // Connection controllers
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(
+                            // Connection status
+                            val connectionStatus = remember { mutableStateOf(false) }
+                            val showDialog = remember { mutableStateOf(false) }
+
+                            Text(
+                                text = if (!connectionStatus.value) "Not Connected" else "Connected",
+                                color = if (!connectionStatus.value) Color.Red else Color.Green,
+                                modifier = Modifier.padding(
                                     paddingValues = PaddingValues(
-                                        5.dp, 10.dp, 5.dp, 0.dp
+                                        0.dp, 50.dp
                                     )
-                                ), horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            CustomButton(buttonText = "Connect", width = 130.dp, onClick = {
-                                showDialog.value = true
-                            })
+                                ),
+                                fontFamily = CamingoCodeFont,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 24.sp
+                            )
 
-                            CustomButton(buttonText = "Disconnect", width = 130.dp, onClick = {
-                                if (connectionStatus.value) {
-                                    disconnectBluetooth()
-                                    connectionStatus.value = false
-                                    showToast("Disconnected")
+                            // Connection controllers
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        paddingValues = PaddingValues(
+                                            5.dp, 10.dp, 5.dp, 0.dp
+                                        )
+                                    ), horizontalArrangement = Arrangement.SpaceEvenly
+                            ) {
+                                CustomButton(buttonText = "Connect", width = 130.dp, onClick = {
+                                    showDialog.value = true
+                                })
+
+                                CustomButton(buttonText = "Disconnect", width = 130.dp, onClick = {
+                                    if (connectionStatus.value) {
+                                        disconnectBluetooth()
+                                        connectionStatus.value = false
+                                        showToast("Disconnected")
+                                    }
+                                })
+
+                                if (showDialog.value) {
+                                    BluetoothDeviceListDialog(
+                                        showDialog = showDialog,
+                                        connectionStatus = connectionStatus,
+                                        onDismissRequest = {
+                                            showDialog.value = false
+                                            if (bluetoothSocket != null && bluetoothSocket!!.isConnected) {
+                                                connectionStatus.value = true
+                                            }
+                                        })
                                 }
-                            })
+                            }
 
-                            if (showDialog.value) {
-                                BluetoothDeviceListDialog(
-                                    showDialog = showDialog,
-                                    connectionStatus = connectionStatus,
-                                    onDismissRequest = {
-                                        showDialog.value = false
-                                        if (bluetoothSocket != null && bluetoothSocket!!.isConnected) {
-                                            connectionStatus.value = true
+                            // Bot on/off controller
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        paddingValues = PaddingValues(
+                                            5.dp, 10.dp, 5.dp, 0.dp
+                                        )
+                                    ), horizontalArrangement = Arrangement.SpaceEvenly
+                            ) {
+                                CustomButton(
+                                    buttonText = "Start",
+                                    width = 130.dp,
+                                    onClick = {
+                                        if (connectionStatus.value) {
+                                            sendDataOverBluetooth(startCode)
+                                        } else {
+                                            showToast("Bluetooth is not connected!")
+                                        }
+                                    })
+                                CustomButton(
+                                    buttonText = "Stop",
+                                    width = 130.dp,
+                                    onClick = {
+                                        if (connectionStatus.value) {
+                                            sendDataOverBluetooth(stopCode)
+                                        } else {
+                                            showToast("Bluetooth is not connected!")
                                         }
                                     })
                             }
-                        }
-
-                        // Bot on/off controller
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(
-                                    paddingValues = PaddingValues(
-                                        5.dp, 10.dp, 5.dp, 0.dp
-                                    )
-                                ), horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            CustomButton(
-                                buttonText = "Start",
-                                width = 130.dp,
-                                onClick = {
-                                    if (connectionStatus.value) {
-                                        sendDataOverBluetooth(startCode)
-                                    } else {
-                                        showToast("Bluetooth is not connected!")
-                                    }
-                                })
-                            CustomButton(
-                                buttonText = "Stop",
-                                width = 130.dp,
-                                onClick = {
-                                    if (connectionStatus.value) {
-                                        sendDataOverBluetooth(stopCode)
-                                    } else {
-                                        showToast("Bluetooth is not connected!")
-                                    }
-                                })
                         }
                     }
                 }
@@ -262,13 +270,13 @@ class MainActivity : ComponentActivity() {
                                             device.createRfcommSocketToServiceRecord(uuid)
                                         bluetoothSocket?.connect()
                                         connectionStatus.value = true
+                                        showDialog.value = false
                                         showToast("Device connected")
                                     } catch (e: IOException) {
                                         disconnectBluetooth()
                                         connectionStatus.value = false
                                         showToast("Failed to connect!")
                                     }
-                                    showDialog.value = false
                                 }
                             }
                         )
