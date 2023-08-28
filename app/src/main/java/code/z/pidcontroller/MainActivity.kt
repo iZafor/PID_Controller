@@ -72,7 +72,7 @@ class MainActivity : ComponentActivity() {
     private var bluetoothSocket: BluetoothSocket? = null
 
     private var connectionJob: Job? = null
-    private val interval = 5000L
+    private val monitoringInterval = 0L
 
     private val uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
 
@@ -115,6 +115,13 @@ class MainActivity : ComponentActivity() {
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
+                            val kp = remember { mutableStateOf(0.0F) }
+                            val kd = remember { mutableStateOf(0.0F) }
+                            val ki = remember { mutableStateOf(0.0F) }
+
+                            val connectionStatus = remember { mutableStateOf(false) }
+                            val showDialog = remember { mutableStateOf(false) }
+
                             // PID controllers
                             Row(
                                 modifier = Modifier
@@ -125,10 +132,6 @@ class MainActivity : ComponentActivity() {
                                         )
                                     ), horizontalArrangement = Arrangement.SpaceEvenly
                             ) {
-                                val kp = remember { mutableStateOf(0.0F) }
-                                val kd = remember { mutableStateOf(0.0F) }
-                                val ki = remember { mutableStateOf(0.0F) }
-
                                 ControllerColumn(
                                     constant = "Kp",
                                     state = kp,
@@ -150,9 +153,6 @@ class MainActivity : ComponentActivity() {
                             }
 
                             // Connection status
-                            val connectionStatus = remember { mutableStateOf(false) }
-                            val showDialog = remember { mutableStateOf(false) }
-
                             Text(
                                 text = if (!connectionStatus.value) "Not Connected" else "Connected",
                                 color = if (!connectionStatus.value) Color.Red else Color.Green,
@@ -232,6 +232,19 @@ class MainActivity : ComponentActivity() {
                                         }
                                     })
                             }
+
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            // Reset button
+                            CustomButton(
+                                buttonText = "Reset",
+                                width = 130.dp,
+                                onClick = {
+                                    kp.value = 0.0F
+                                    kd.value = 0.0F
+                                    ki.value = 0.0F
+                                }
+                            )
                         }
                     }
                 }
@@ -273,7 +286,7 @@ class MainActivity : ComponentActivity() {
                                     try {
                                         bluetoothSocket =
                                             device.createRfcommSocketToServiceRecord(uuid)
-                                        bluetoothSocket?.connect()
+                                        bluetoothSocket!!.connect()
                                         connectionStatus.value = true
                                         showDialog.value = false
                                         monitorBluetoothConnection(connectionStatus)
@@ -431,7 +444,7 @@ class MainActivity : ComponentActivity() {
     private fun monitorBluetoothConnection(connectionStatus: MutableState<Boolean>) {
         connectionJob = CoroutineScope(Dispatchers.IO).launch {
             while (isActive) {
-                delay(interval)
+                delay(monitoringInterval)
                 try {
                     bluetoothSocket!!.inputStream.read()
                 } catch (e: IOException) {

@@ -61,11 +61,11 @@ tasks.register("renameApk") {
     }
 }
 
-tasks.all {
-    if (name.startsWith("package") && name.endsWith("Release")) {
-        finalizedBy("renameApk")
-    }
-}
+//tasks.all {
+//    if (name.startsWith("package") && name.endsWith("Release")) {
+//        finalizedBy("renameApk")
+//    }
+//}
 
 dependencies {
 
