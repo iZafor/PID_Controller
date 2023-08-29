@@ -82,6 +82,8 @@ class MainActivity : ComponentActivity() {
     private val kdDecrementCode = 'E'
     private val kiIncrementCode = 'I'
     private val kiDecrementCode = 'J'
+    private val factorUpScaleCode = 'U'
+    private val factorDownScaleCode = 'V'
     private val startCode = 'S'
     private val stopCode = 'T'
 
@@ -115,9 +117,10 @@ class MainActivity : ComponentActivity() {
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            val kp = remember { mutableStateOf(0.0F) }
-                            val kd = remember { mutableStateOf(0.0F) }
-                            val ki = remember { mutableStateOf(0.0F) }
+                            val kp = remember { mutableStateOf(0.0) }
+                            val kd = remember { mutableStateOf(0.0) }
+                            val ki = remember { mutableStateOf(0.0) }
+                            val factor = remember { mutableStateOf(0.1) }
 
                             val connectionStatus = remember { mutableStateOf(false) }
                             val showDialog = remember { mutableStateOf(false) }
@@ -135,20 +138,31 @@ class MainActivity : ComponentActivity() {
                                 ControllerColumn(
                                     constant = "Kp",
                                     state = kp,
+                                    factor = factor,
                                     incrementCode = kpIncrementCode,
                                     decrementCode = kpDecrementCode
                                 )
                                 ControllerColumn(
                                     constant = "Kd",
                                     state = kd,
+                                    factor = factor,
                                     incrementCode = kdIncrementCode,
                                     decrementCode = kdDecrementCode
                                 )
                                 ControllerColumn(
                                     constant = "Ki",
                                     state = ki,
+                                    factor = factor,
                                     incrementCode = kiIncrementCode,
                                     decrementCode = kiDecrementCode
+                                )
+                                ControllerColumn(
+                                    constant = "Factor",
+                                    state = factor,
+                                    incrementCode = factorUpScaleCode,
+                                    decrementCode = factorDownScaleCode,
+                                    incrementIcon = R.drawable.multiply,
+                                    decrementIcon = R.drawable.divide
                                 )
                             }
 
@@ -240,9 +254,10 @@ class MainActivity : ComponentActivity() {
                                 buttonText = "Reset",
                                 width = 130.dp,
                                 onClick = {
-                                    kp.value = 0.0F
-                                    kd.value = 0.0F
-                                    ki.value = 0.0F
+                                    kp.value = 0.0
+                                    kd.value = 0.0
+                                    ki.value = 0.0
+                                    factor.value = 0.1
                                 }
                             )
                         }
@@ -357,12 +372,15 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun ControllerColumn(
         constant: String,
-        state: MutableState<Float>,
+        state: MutableState<Double>,
+        factor: MutableState<Double>? = null,
         incrementCode: Char,
         decrementCode: Char,
         height: Dp = 200.dp,
         width: Dp = 85.dp,
         textColor: Color = baseTextColor,
+        incrementIcon: Int = R.drawable.plus,
+        decrementIcon: Int = R.drawable.minus,
         backgroundColor: Color = baseBackgroundColor,
         fontFamily: FontFamily = CamingoCodeFont,
     ) {
@@ -374,7 +392,7 @@ class MainActivity : ComponentActivity() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             CustomButton(
-                rId = R.drawable.plus,
+                rId = incrementIcon,
                 height = 55.dp,
                 maxWidth = true,
                 onClick = {
@@ -382,7 +400,11 @@ class MainActivity : ComponentActivity() {
                         showToast("Bluetooth is not connected")
                         return@CustomButton
                     }
-                    state.value += 0.1F
+                    if (factor != null) {
+                        state.value += factor.value
+                    } else {
+                        state.value *= 10
+                    }
                     sendDataOverBluetooth(incrementCode)
                 },
                 backgroundColor = Color(android.R.color.black)
@@ -399,18 +421,18 @@ class MainActivity : ComponentActivity() {
                 textAlign = TextAlign.Center
             )
             Text(
-                text = "%.1f".format(state.value),
+                text = "%.6f".format(state.value),
                 fontFamily = fontFamily,
                 color = textColor,
                 modifier = Modifier
-                    .size(width, 35.dp)
+                    .size(width, 42.dp)
                     .background(backgroundColor),
                 textAlign = TextAlign.Center
             )
 
             Spacer(modifier = Modifier.height(4.dp))
             CustomButton(
-                rId = R.drawable.minus,
+                rId = decrementIcon,
                 height = 55.dp,
                 maxWidth = true,
                 onClick = {
@@ -418,8 +440,12 @@ class MainActivity : ComponentActivity() {
                         showToast("Bluetooth is not connected")
                         return@CustomButton
                     }
-                    if (state.value >= 0.1F) {
-                        state.value -= 0.1F
+                    if (state.value >= 0.00001) {
+                        if (factor != null) {
+                            state.value -= factor.value
+                        } else {
+                            state.value /= 10
+                        }
                         sendDataOverBluetooth(decrementCode)
                     }
                 },

@@ -15,3 +15,6 @@
     - Decrement: J
 - **Start**: S
 - **Stop**: T
+- **Factor**
+  - Upscale(multiply by 10): U
+  - Downscale(devide by 10): V
