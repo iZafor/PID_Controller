@@ -59,6 +59,10 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.util.UUID
+import kotlin.math.abs
+import kotlin.math.pow
+import kotlin.math.round
+import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
     private val CamingoCodeFont = FontFamily(
@@ -440,12 +444,11 @@ class MainActivity : ComponentActivity() {
                         showToast("Bluetooth is not connected")
                         return@CustomButton
                     }
-                    if (state.value >= 0.00001) {
-                        if (factor != null) {
-                            state.value -= factor.value
-                        } else {
-                            state.value /= 10
-                        }
+                    if (factor != null && (state.value - factor.value).roundToDecimalPlaces(6) >= 0) {
+                        state.value = abs(state.value - factor.value)
+                        sendDataOverBluetooth(decrementCode)
+                    } else if (factor == null && state.value >= 0.00001) {
+                        state.value /= 10
                         sendDataOverBluetooth(decrementCode)
                     }
                 },
@@ -485,5 +488,10 @@ class MainActivity : ComponentActivity() {
     private fun stopMonitoring() {
         connectionJob?.cancel()
         connectionJob = null
+    }
+
+    private fun Double.roundToDecimalPlaces(decimalPlaces: Int): Double {
+        val factor = 10.0.pow(decimalPlaces.toDouble())
+        return (this * factor).roundToInt() / factor
     }
 }
