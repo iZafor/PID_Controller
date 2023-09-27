@@ -57,11 +57,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.util.UUID
 import kotlin.math.abs
 import kotlin.math.pow
-import kotlin.math.round
 import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
@@ -475,7 +475,9 @@ class MainActivity : ComponentActivity() {
             while (isActive) {
                 delay(monitoringInterval)
                 try {
-                    bluetoothSocket!!.inputStream.read()
+                    withContext(Dispatchers.IO) {
+                        bluetoothSocket!!.inputStream.read()
+                    }
                 } catch (e: IOException) {
                     connectionStatus.value = false
                     disconnectBluetooth()
