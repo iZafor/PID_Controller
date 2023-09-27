@@ -1,11 +1,11 @@
 # PID Controller App
 
-It is an android app which lets you control **PID** constants
-using **Bluetooth** modules like HC-05.
+It is an android app which lets you control **PID** constants through
+**Bluetooth** modules like HC-05. [_Download APK_](https://tinyurl.com/PID-Controller)
 
-## Available commands
+## Available Commands
 
-| **Parameters** | **INCREMENT** | **DECREMENT** |
+| **PARAMETERS** | **INCREMENT** | **DECREMENT** |
 |:--------------:|:-------------:|:-------------:|
 |     **Kp**     |       P       |       Q       |
 |     **Kd**     |       D       |       E       |

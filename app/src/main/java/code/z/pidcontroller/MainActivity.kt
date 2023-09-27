@@ -80,17 +80,6 @@ class MainActivity : ComponentActivity() {
 
     private val uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
 
-    private val kpIncrementCode = 'P'
-    private val kpDecrementCode = 'Q'
-    private val kdIncrementCode = 'D'
-    private val kdDecrementCode = 'E'
-    private val kiIncrementCode = 'I'
-    private val kiDecrementCode = 'J'
-    private val factorUpScaleCode = 'U'
-    private val factorDownScaleCode = 'V'
-    private val startCode = 'S'
-    private val stopCode = 'T'
-
     private val baseTextColor = Color(0xFF36395A)
     private val baseBackgroundColor = Color(0xFFFCFCFD)
 
@@ -143,28 +132,28 @@ class MainActivity : ComponentActivity() {
                                     constant = "Kp",
                                     state = kp,
                                     factor = factor,
-                                    incrementCode = kpIncrementCode,
-                                    decrementCode = kpDecrementCode
+                                    incrementCode = Commands.KP_INCREMENT.value,
+                                    decrementCode = Commands.KP_DECREMENT.value
                                 )
                                 ControllerColumn(
                                     constant = "Kd",
                                     state = kd,
                                     factor = factor,
-                                    incrementCode = kdIncrementCode,
-                                    decrementCode = kdDecrementCode
+                                    incrementCode = Commands.KD_INCREMENT.value,
+                                    decrementCode = Commands.KD_DECREMENT.value
                                 )
                                 ControllerColumn(
                                     constant = "Ki",
                                     state = ki,
                                     factor = factor,
-                                    incrementCode = kiIncrementCode,
-                                    decrementCode = kiDecrementCode
+                                    incrementCode = Commands.KI_INCREMENT.value,
+                                    decrementCode = Commands.KI_DECREMENT.value
                                 )
                                 ControllerColumn(
                                     constant = "Factor",
                                     state = factor,
-                                    incrementCode = factorUpScaleCode,
-                                    decrementCode = factorDownScaleCode,
+                                    incrementCode = Commands.FACTOR_UPSCALE.value,
+                                    decrementCode = Commands.FACTOR_DOWNSCALE.value,
                                     incrementIcon = R.drawable.multiply,
                                     decrementIcon = R.drawable.divide
                                 )
@@ -234,7 +223,7 @@ class MainActivity : ComponentActivity() {
                                     width = 130.dp,
                                     onClick = {
                                         if (connectionStatus.value) {
-                                            sendDataOverBluetooth(startCode)
+                                            sendDataOverBluetooth(Commands.START.value)
                                         } else {
                                             showToast("Bluetooth is not connected!")
                                         }
@@ -244,7 +233,7 @@ class MainActivity : ComponentActivity() {
                                     width = 130.dp,
                                     onClick = {
                                         if (connectionStatus.value) {
-                                            sendDataOverBluetooth(stopCode)
+                                            sendDataOverBluetooth(Commands.STOP.value)
                                         } else {
                                             showToast("Bluetooth is not connected!")
                                         }
